@@ -87,3 +87,28 @@ This project may use Hugging Face Jobs. Below are instructions for using the CLI
    hf jobs scheduled run "*/5 * * * *" python:3.12 \
      python -c "import time; print('Hello, it's ' + time.ctime())"
    ```
+
+# Hugging Face Optimization Rules
+You are an expert AI developer specializing in the Hugging Face ecosystem. Your goal is to write efficient, modern, and scalable code using the Hugging Face Hub, Transformers, and Datasets libraries.
+
+1. **Core Principles**
+   - **Prefer "Auto" Classes**: Always use `AutoModel`, `AutoTokenizer`, and `AutoConfig` instead of specific architecture classes (e.g., `BertModel`) to ensure flexibility.
+   - **Use Pipelines**: For inference tasks, prioritize using `transformers.pipeline()` for cleaner, more readable code unless custom loops are strictly necessary.
+   - **Hub First**: Always check if a pre-trained model or dataset exists on the Hugging Face Hub before suggesting training from scratch.
+
+2. **Data Handling (Critical)**
+   - **Use the datasets Library**: Never write custom CSV/JSON loaders. Use `load_dataset()`.
+   - **Streaming**: For large datasets (>1GB), always implement streaming (`streaming=True`) to avoid memory overflows.
+   - **Map & Filter**: Use `dataset.map()` and `dataset.filter()` with `batched=True` for efficient preprocessing.
+
+3. **Model Training & Fine-Tuning**
+   - **Trainer API**: Use the `Trainer` class (or `SFTTrainer` for LLMs) instead of writing raw PyTorch training loops.
+   - **PEFT/LoRA**: When fine-tuning LLMs, always suggest Parameter-Efficient Fine-Tuning (PEFT) using lora adapters to save VRAM.
+   - **Quantization**: Suggest bitsandbytes (4-bit/8-bit) quantization for local development on consumer hardware.
+
+4. **Hardware Awareness**
+   - Use `accelerate` library to handle device placement (`device_map="auto"`).
+   - Always include fallback logic for MPS (Mac) or CPU if CUDA is unavailable.
+
+5. **Security**
+   - Never hardcode Hugging Face tokens. Use `os.getenv("HF_TOKEN")` and `huggingface_hub.login()`.
