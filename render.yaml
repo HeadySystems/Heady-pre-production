@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: heady-manager
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      # Assuming Render environment supports Node.js alongside Python or using a hybrid build
+      if command -v npm &> /dev/null; then
+          cd frontend && npm install && npm run build
+      else
+          # Fallback for environments without Node.js (e.g. strict Python containers)
+          echo "Warning: Node.js not found. Deploying placeholder frontend."
+          mkdir -p frontend/build
+          echo "Heady Admin UI - Frontend Build Failed (Node.js missing)" > frontend/build/index.html
+      fi
+    startCommand: python -m src.heady_project.admin_console --action serve_api
+    envVars:
+      - key: DATABASE_URL
+        fromSecret: DATABASE_URL
+      - key: OTHER_API_KEY
+        fromSecret: OTHER_API_KEY
+      - key: CLOUDFLARE_API_TOKEN
+        fromSecret: CLOUDFLARE_API_TOKEN
+      - key: CLOUDFLARE_ACCOUNT_ID
+        fromSecret: CLOUDFLARE_ACCOUNT_ID
+      - key: HEADY_VERSION
+        value: v12.3
+      - key: ADMIN_TOKEN
+        fromSecret: ADMIN_TOKEN # Ensure this is set in Render dashboard
