@@ -132,3 +132,29 @@ This project utilizes the Hugging Face ecosystem to build a sentiment analysis t
 - **New Features**: When adding a new model, create a small test script in `tests/` to verify it loads before integrating it into the main app.
 - **Refactoring**: When refactoring, preserve the `device_map="auto"` argument to ensure cross-platform compatibility.
 - **Dependencies**: If you import a new HF library, immediately add it to `requirements.txt`.
+
+# Setup Script
+Use the following bash script to install core libraries and authenticate:
+
+```bash
+#!/bin/bash
+
+# 1. Install Core Hugging Face Libraries
+# - transformers: The main library for models
+# - datasets: For data loading
+# - accelerate: For hardware optimization (GPU/MPS/CPU)
+# - gradio: For the UI
+# - huggingface_hub: For CLI authentication
+pip install transformers datasets accelerate gradio huggingface_hub
+
+# 2. Install Optimization Libraries (Optional but recommended)
+# - bitsandbytes: For 8-bit/4-bit quantization (Linux/Windows only)
+# - optimum: For ONNX/hardware specific acceleration
+pip install bitsandbytes optimum
+
+# 3. Interactive Login
+echo "----------------------------------------------------------------"
+echo "Please run 'huggingface-cli login' to authenticate your machine."
+echo "You will need a token from https://huggingface.co/settings/tokens"
+echo "----------------------------------------------------------------"
+```
