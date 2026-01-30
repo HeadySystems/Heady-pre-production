@@ -51,10 +51,19 @@ def _maybe_issue(
 def audit_render_yaml(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         return []
-    data = yaml.safe_load(path.read_text()) or {}
+    try:
+        content = path.read_text()
+        data = yaml.safe_load(content) or {}
+    except yaml.YAMLError as e:
+        return [{"file": str(path), "key": "parse_error", "value": "", "message": f"YAML parse error: {e}"}]
+    except Exception as e:
+        return [{"file": str(path), "key": "read_error", "value": "", "message": f"Failed to read file: {e}"}]
+    
     issues: List[Dict[str, str]] = []
     services = data.get("services", [])
     for idx, service in enumerate(services):
+        if not isinstance(service, dict):
+            continue
         env_vars = service.get("envVars", [])
         for env_idx, env in enumerate(env_vars):
             if isinstance(env, dict) and "key" in env and "value" in env:
@@ -87,10 +96,22 @@ def audit_render_yaml(path: Path) -> List[Dict[str, str]]:
 def audit_mcp_config(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         return []
-    data = json.loads(path.read_text())
+    try:
+        content = path.read_text()
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        return [{"file": str(path), "key": "parse_error", "value": "", "message": f"JSON parse error: {e}"}]
+    except Exception as e:
+        return [{"file": str(path), "key": "read_error", "value": "", "message": f"Failed to read file: {e}"}]
+    
     issues: List[Dict[str, str]] = []
     servers = data.get("mcpServers", {})
+    if not isinstance(servers, dict):
+        return issues
+        
     for server_name, server in servers.items():
+        if not isinstance(server, dict):
+            continue
         env = server.get("env", {})
         if not isinstance(env, dict):
             continue
@@ -121,12 +142,31 @@ def audit_mcp_config(path: Path) -> List[Dict[str, str]]:
 
 
 def audit_configurations(project_root: Path) -> Dict[str, Any]:
-    render_path = project_root / "render.yaml"
-    mcp_path = project_root / "mcp_config.json"
-    render_issues = audit_render_yaml(render_path)
-    mcp_issues = audit_mcp_config(mcp_path)
-    return {
-        "render_yaml_issues": render_issues,
-        "mcp_config_issues": mcp_issues,
-        "issue_count": len(render_issues) + len(mcp_issues),
-    }
+    """
+    Audit configuration files for security issues.
+    
+    Args:
+        project_root: Path to the project root directory
+        
+    Returns:
+        Dictionary containing audit results and issue counts
+    """
+    try:
+        render_path = project_root / "render.yaml"
+        mcp_path = project_root / "mcp_config.json"
+        
+        render_issues = audit_render_yaml(render_path)
+        mcp_issues = audit_mcp_config(mcp_path)
+        
+        return {
+            "render_yaml_issues": render_issues,
+            "mcp_config_issues": mcp_issues,
+            "issue_count": len(render_issues) + len(mcp_issues),
+        }
+    except Exception as e:
+        return {
+            "error": f"Audit failed: {e}",
+            "render_yaml_issues": [],
+            "mcp_config_issues": [],
+            "issue_count": 0,
+        }

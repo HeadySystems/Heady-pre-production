@@ -3,6 +3,7 @@ import logging
 import secrets
 import asyncio
 import json
+from contextlib import asynccontextmanager
 from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, WebSocket, Depends, Header, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
@@ -14,7 +15,16 @@ from .nlp_service import nlp_service
 from .mcp_service import mcp_service
 
 logger = get_logger(__name__)
-app = FastAPI(title="Heady Admin Console")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Trigger background indexing
+    asyncio.create_task(asyncio.to_thread(nlp_service.index_repository, "."))
+    yield
+    # Shutdown: cleanup if needed
+    pass
+
+app = FastAPI(title="Heady Admin Console", lifespan=lifespan)
 
 # Security
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "default_insecure_token")
@@ -242,11 +252,6 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
     except Exception as e:
         logger.error(f"Websocket error: {e}")
         manager.disconnect(websocket)
-
-@app.on_event("startup")
-async def startup_event():
-    # Trigger background indexing
-    asyncio.create_task(asyncio.to_thread(nlp_service.index_repository, "."))
 
 # Serve Frontend
 if os.path.exists("frontend/build"):

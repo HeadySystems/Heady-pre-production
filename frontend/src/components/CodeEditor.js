@@ -15,6 +15,7 @@ const CodeEditor = ({ code, language, onChange, onSave, filename }) => {
   };
 
   const isHtml = filename && (filename.endsWith('.html') || filename.endsWith('.htm'));
+  const isSandboxSafe = isHtml; // Only allow preview for safe content types
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -30,7 +31,7 @@ const CodeEditor = ({ code, language, onChange, onSave, filename }) => {
                 alignItems: 'center'
             }}>
                 <span>{filename}</span>
-                {isHtml && (
+                {isSandboxSafe && (
                     <button
                         onClick={() => setShowPreview(!showPreview)}
                         style={{
@@ -48,7 +49,7 @@ const CodeEditor = ({ code, language, onChange, onSave, filename }) => {
             </div>
         )}
         <div style={{ flex: 1, position: 'relative' }}>
-            {showPreview && isHtml ? (
+            {showPreview && isSandboxSafe ? (
                 <iframe
                     title="preview"
                     srcDoc={code}
@@ -68,6 +69,8 @@ const CodeEditor = ({ code, language, onChange, onSave, filename }) => {
                     minimap: { enabled: true },
                     automaticLayout: true,
                     fontSize: 14,
+                    wordWrap: 'on',
+                    scrollBeyondLastLine: false,
                 }}
                 />
             )}

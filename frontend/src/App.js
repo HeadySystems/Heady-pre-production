@@ -11,8 +11,14 @@ function App() {
   const [currentFile, setCurrentFile] = useState(null); // { path, content }
   const [showSettings, setShowSettings] = useState(false);
   const [language, setLanguage] = useState('plaintext');
+  const [notification, setNotification] = useState(null); // { type: 'success'|'error', message: string }
 
   const token = localStorage.getItem('admin_token') || 'default_insecure_token';
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleFileSelect = async (path) => {
     try {
@@ -29,6 +35,8 @@ function App() {
       setLanguage(langMap[ext] || 'plaintext');
     } catch (err) {
       console.error("Failed to load file", err);
+      const errorMsg = err.response?.data?.detail || err.message || "Failed to load file";
+      showNotification('error', `Error loading file: ${errorMsg}`);
     }
   };
 
@@ -45,10 +53,11 @@ function App() {
             path: currentFile.path,
             content: currentFile.content
         }, { headers: { 'X-Admin-Token': token } });
-        console.log("Saved");
-        // Could show a toast notification here
+        showNotification('success', `Saved ${currentFile.path}`);
     } catch (err) {
         console.error("Failed to save", err);
+        const errorMsg = err.response?.data?.detail || err.message || "Failed to save file";
+        showNotification('error', `Error saving file: ${errorMsg}`);
     }
   };
 
@@ -84,6 +93,25 @@ function App() {
       </div>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
+      {/* Notification Toast */}
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          padding: '12px 20px',
+          borderRadius: '4px',
+          backgroundColor: notification.type === 'success' ? '#4caf50' : '#f44336',
+          color: 'white',
+          zIndex: 1001,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          maxWidth: '400px',
+          animation: 'slideIn 0.3s ease-out'
+        }}>
+          {notification.message}
+        </div>
+      )}
     </div>
   );
 }
