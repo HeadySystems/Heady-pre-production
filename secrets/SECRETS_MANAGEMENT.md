@@ -10,6 +10,7 @@ You must define the following environment variables for the system to function:
 | **\`HF_TOKEN\`** | Hugging Face | Access to Pro/Enterprise Inference Endpoints and gated models (Llama 3, etc.). | [Settings > Access Tokens](https://huggingface.co/settings/tokens) (Read/Write) |
 | **\`GOOGLE_API_KEY\`** | Google Cloud | Access to Gemini Ultra/Advanced models. | [Google AI Studio](https://aistudio.google.com/app/apikey) |
 | **\`HEADY_API_KEY\`** | Heady Services | Authenticating with the internal Heady ecosystem. | Request from Heady Admin / DevOps |
+| **\`JULES_SECRET\`** | Jules Agent | (Optional) Internal authentication for Jules agent operations. | Internal DevOps |
 | **\`GH_TOKEN\`** | GitHub | (Optional) Automated CI/CD actions or package registry access. | GitHub Developer Settings |
 
 ## 2. Implementation Methods
