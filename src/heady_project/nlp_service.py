@@ -51,20 +51,23 @@ class NLPService:
                 )
 
             # Summarization Pipeline
+            # Using device_map="auto" is generally safer for accelerate handling unless explicitly on CPU
+            device_arg = {"device_map": "auto"} if self.device == 0 else {"device": -1}
+
             self.summ_pipe = pipeline(
                 "summarization",
                 model="t5-small",
-                device=self.device,
-                model_kwargs={"quantization_config": quantization_config} if quantization_config else {}
+                model_kwargs={"quantization_config": quantization_config} if quantization_config else {},
+                **device_arg
             )
 
             # Generation Pipeline (LangChain compatible)
             gen_pipe = pipeline(
                 "text-generation",
                 model="distilgpt2",
-                device=self.device,
                 max_new_tokens=256,
-                model_kwargs={"quantization_config": quantization_config} if quantization_config else {}
+                model_kwargs={"quantization_config": quantization_config} if quantization_config else {},
+                **device_arg
             )
             self.local_llm = HuggingFacePipeline(pipeline=gen_pipe)
 
