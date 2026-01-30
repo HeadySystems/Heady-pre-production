@@ -40,3 +40,12 @@ This protocol describes how to leverage Google Colab's free GPU resources to run
 - **GPU Acceleration:** The `NLPService` will automatically detect the Colab GPU and use it for Hugging Face models (`T5`, `DistilGPT2`), significantly speeding up text generation and summarization.
 - **Zero Local Setup:** No need to install Python or Node.js locally.
 - **Remote Access:** Access your Admin IDE from anywhere via the Ngrok tunnel.
+
+## Accessing Local Repository (Optional)
+
+If your code is on a local machine (not GitHub) and you need to push it to Colab:
+
+1.  Open PowerShell in your project root.
+2.  Run `.\scripts\colab_bridge.ps1`.
+3.  Follow the instructions to get the Ngrok URL.
+4.  In Colab, use `!wget` to download specific files or zip/unzip the project.
