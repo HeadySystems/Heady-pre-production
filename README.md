@@ -49,6 +49,11 @@ Admin Console:
 python -m src.heady_project.admin_console --action full_audit
 ```
 
+## Cloud / GPU Execution
+To run this project on Google Colab and utilize free GPU resources for AI tasks:
+1. See [COLAB_PROTOCOL.md](COLAB_PROTOCOL.md) for detailed instructions.
+2. Use the `notebooks/Heady_Colab_Protocol.ipynb` notebook.
+
 ## Testing
 Run tests using pytest:
 ```bash

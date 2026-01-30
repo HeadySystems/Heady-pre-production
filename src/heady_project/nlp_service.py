@@ -1,4 +1,5 @@
 import logging
+import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM
 from .utils import get_logger
 
@@ -19,11 +20,16 @@ class NLPService:
 
         logger.info("Initializing NLP models...")
         try:
+            # Check for GPU
+            device = 0 if torch.cuda.is_available() else -1
+            device_name = torch.cuda.get_device_name(0) if device == 0 else "CPU"
+            logger.info(f"Using device: {device_name}")
+
             # Summarization (T5-small is lightweight)
-            self.summarizer = pipeline("summarization", model="t5-small")
+            self.summarizer = pipeline("summarization", model="t5-small", device=device)
 
             # Chat/Text Generation (DistilGPT2 is lightweight)
-            self.generator = pipeline("text-generation", model="distilgpt2")
+            self.generator = pipeline("text-generation", model="distilgpt2", device=device)
 
             self.initialized = True
             logger.info("NLP models initialized successfully.")
