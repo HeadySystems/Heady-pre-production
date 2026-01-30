@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--action", choices=["builder_build", "full_audit", "serve_api", "mint"], required=True, help="Action to perform")
     parser.add_argument("--version", help="Override version")
     parser.add_argument("--amount", type=int, default=100, help="Amount to mint (if action is mint)")
+    parser.add_argument("--check", choices=["health", "structure", "deps", "security", "config"], help="Specific check for audit action")
 
     args = parser.parse_args()
 
@@ -27,7 +28,7 @@ def main():
     if args.action == "builder_build":
         run_consolidated_build(current_version)
     elif args.action == "full_audit":
-        full_audit()
+        full_audit(args.check)
     elif args.action == "serve_api":
         serve_api()
     elif args.action == "mint":
