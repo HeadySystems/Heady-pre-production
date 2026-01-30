@@ -83,12 +83,25 @@ def check_dependencies(project_root):
             installed = {pkg["name"].lower(): pkg["version"] for pkg in pip_data}
 
             with open(requirements_txt) as f:
-                required = [line.strip().split("==")[0].lower()
-                           for line in f if line.strip() and not line.startswith("#")]
+                lines = f.readlines()
+                required = []
+                for line in lines:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        # Handle various formats: pkg, pkg==version, pkg>=version
+                        pkg_name = line.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].lower()
+                        required.append(pkg_name)
 
             deps_info["python_packages"] = [
                 pkg for pkg in required if pkg in installed
             ]
+            deps_info["missing"] = [
+                pkg for pkg in required if pkg not in installed
+            ]
+        except json.JSONDecodeError as e:
+            log_error(f"Failed to parse pip list output: {e}")
+        except FileNotFoundError as e:
+            log_error(f"Requirements file not found: {e}")
         except Exception as e:
             log_error(f"Failed to get Python packages: {e}")
 
@@ -96,6 +109,19 @@ def check_dependencies(project_root):
 
 def check_security(project_root):
     """Security audit checks"""
+    # Validate project_root is a directory
+    if not project_root.is_dir():
+        log_error(f"Project root is not a directory: {project_root}")
+        return {
+            "error": "Invalid project root directory",
+            "has_env_file": False,
+            "has_env_example": False,
+            "has_env_template": False,
+            "secrets_in_config": [],
+            "file_permissions": {},
+            "config_audit": {}
+        }
+    
     security_info = {
         "has_env_file": (project_root / ".env").exists(),
         "has_env_example": (project_root / ".env.example").exists(),
@@ -111,14 +137,25 @@ def check_security(project_root):
         config_path = project_root / config_file
         if config_path.exists():
             try:
+                # Ensure we're not traversing outside project root
+                if not config_path.resolve().is_relative_to(project_root.resolve()):
+                    log_error(f"Security: {config_file} is outside project root")
+                    continue
+                    
                 with open(config_path) as f:
                     content = f.read()
                     if "password" in content.lower() or "token" in content.lower():
                         security_info["secrets_in_config"].append(config_file)
+            except PermissionError as e:
+                log_error(f"Permission denied reading {config_file}: {e}")
             except Exception as e:
                 log_error(f"Failed to check {config_file}: {e}")
 
-    security_info["config_audit"] = audit_configurations(project_root)
+    try:
+        security_info["config_audit"] = audit_configurations(project_root)
+    except Exception as e:
+        log_error(f"Failed to run config audit: {e}")
+        security_info["config_audit"] = {"error": str(e)}
 
     return security_info
 
