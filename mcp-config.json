@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "heady-local": {
+      "command": "python3",
+      "args": [
+        "src/heady_project/heady_mcp_server.py"
+      ],
+      "env": {
+        "HF_TOKEN": "${HF_TOKEN}",
+        "HEADY_API_KEY": "${HEADY_API_KEY}",
+        "ADMIN_TOKEN": "${ADMIN_TOKEN}"
+      }
+    }
+  }
+}
