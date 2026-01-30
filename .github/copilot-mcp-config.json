@@ -34,6 +34,16 @@
       },
       "tools": ["*"],
       "_comment": "Cloudflare server using API token and Account ID from secrets."
+    },
+    "heady-services": {
+      "type": "local",
+      "command": "python",
+      "args": ["-m", "src.heady_project.fast_mcp_server"],
+      "env": {
+        "HEADY_API_KEY": "${{ secrets.HEADY_API_KEY }}"
+      },
+      "tools": ["*"],
+      "_comment": "Internal Heady Services Integration."
     }
   }
 }
