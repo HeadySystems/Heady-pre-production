@@ -34,6 +34,17 @@
       },
       "tools": ["*"],
       "_comment": "Cloudflare access via env vars."
+    },
+    "heady-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "heady-mcp-server"
+      ],
+      "env": {
+        "HEADY_API_TOKEN": "${HEADY_SECRET}",
+        "HEADY_ENV": "production"
+      }
     }
   }
 }
