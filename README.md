@@ -60,9 +60,47 @@ Run tests using pytest:
 pytest
 ```
 
-## GitHub Copilot Customisation
+## Development Scripts
 
-This project is optimized for GitHub Copilot.
-- **Instructions**: See `.github/copilot-instructions.md` for project context and guidelines.
-- **Workflow**: A setup workflow (`.github/workflows/copilot-setup-steps.yml`) prepares the environment for Copilot.
-- **MCP**: Model Context Protocol servers are defined in `mcp_config.json` and `.github/copilot-mcp-config.json`.
+### Available Scripts
+- `npm start` – Start the server
+- `python src/process_data.py` – Run Python worker standalone
+- `python admin_console.py` – Run system audit
+- `python src/process_data.py qa` – Test QA interface
+
+### Testing
+```bash
+# Test Python worker QA functionality
+echo '{"question":"What is Heady?","context":"Heady is a system"}' | python src/process_data.py qa
+
+# Run system audit
+python admin_console.py --output audit.json
+
+# Run config-only audit
+python admin_console.py --check config
+
+# Run Python unit tests
+python -m pytest
+```
+
+## Copilot Customization
+
+- `.github/copilot-instructions.md` – Project overview and Quiz Protocol for documentation
+- `.github/copilot-mcp-config.json` – MCP server definitions
+- `.github/workflows/copilot-setup-steps.yml` – Setup workflow for Copilot
+
+## Documentation Protocol
+
+All documentation follows the **Quiz & Flashcard Methodology** (see `.github/copilot-instructions.md`).
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow the code style guidelines in `.github/copilot-instructions.md`
+4. Ensure all tests pass
+5. Submit a pull request
+
+## License
+
+See LICENSE file.
