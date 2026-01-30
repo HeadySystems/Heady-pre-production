@@ -36,6 +36,7 @@
       "_comment": "Cloudflare access via env vars."
     },
     "heady-server": {
+      "type": "local",
       "command": "npx",
       "args": [
         "-y",
@@ -44,7 +45,9 @@
       "env": {
         "HEADY_API_TOKEN": "${HEADY_SECRET}",
         "HEADY_ENV": "production"
-      }
+      },
+      "tools": ["*"],
+      "_comment": "Heady service access via API token."
     }
   }
 }
