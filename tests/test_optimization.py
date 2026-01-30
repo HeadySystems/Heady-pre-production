@@ -4,15 +4,17 @@ import os
 import sys
 
 sys.modules['bitsandbytes'] = MagicMock()
-sys.modules['chromadb'] = MagicMock()
+# sys.modules['chromadb'] = MagicMock() # Don't mock top-level if we patch Client
 
 class TestOptimization(unittest.TestCase):
 
     @patch('src.heady_project.nlp_service.pipeline')
     @patch('src.heady_project.nlp_service.HuggingFacePipeline')
-    @patch('src.heady_project.nlp_service.chromadb.Client')
+    @patch('src.heady_project.nlp_service.chromadb.PersistentClient')
     def test_nlp_service_initialization(self, mock_chroma, mock_hf_pipeline, mock_pipeline):
-        mock_chroma.return_value.get_or_create_collection.return_value = MagicMock()
+        # Configure mock return values to avoid typing errors
+        mock_collection = MagicMock()
+        mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
         mock_pipeline.return_value = MagicMock()
 
         from src.heady_project.nlp_service import NLPService
@@ -22,14 +24,14 @@ class TestOptimization(unittest.TestCase):
 
         self.assertTrue(service.initialized)
         mock_chroma.assert_called_once()
+        # Summarization + Generation
         self.assertEqual(mock_pipeline.call_count, 2)
 
     @patch('src.heady_project.nlp_service.pipeline')
     @patch('src.heady_project.nlp_service.HuggingFacePipeline')
-    @patch('src.heady_project.nlp_service.chromadb.Client')
+    @patch('src.heady_project.nlp_service.chromadb.PersistentClient')
     @patch('src.heady_project.nlp_service.ChatGoogleGenerativeAI')
     def test_gemini_integration(self, mock_gemini, mock_chroma, mock_hf, mock_pipeline):
-        # Mock dependencies to prevent real initialization failure
         mock_chroma.return_value.get_or_create_collection.return_value = MagicMock()
         mock_pipeline.return_value = MagicMock()
 

@@ -243,6 +243,11 @@ async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
         logger.error(f"Websocket error: {e}")
         manager.disconnect(websocket)
 
+@app.on_event("startup")
+async def startup_event():
+    # Trigger background indexing
+    asyncio.create_task(asyncio.to_thread(nlp_service.index_repository, "."))
+
 # Serve Frontend
 if os.path.exists("frontend/build"):
     app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")

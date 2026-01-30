@@ -37,9 +37,12 @@ class NLPService:
 
         try:
             # 1. Vector Store (ChromaDB) - FOSS
-            self.chroma_client = chromadb.Client()
+            # Use persistent storage
+            db_path = os.path.join(os.getcwd(), "admin", "db", "chroma")
+            os.makedirs(db_path, exist_ok=True)
+            self.chroma_client = chromadb.PersistentClient(path=db_path)
             self.collection = self.chroma_client.get_or_create_collection(name="heady_knowledge_base")
-            logger.info("ChromaDB initialized.")
+            logger.info(f"ChromaDB initialized at {db_path}.")
 
             # 2. Local Models (Quantized if GPU)
             quantization_config = None
@@ -133,5 +136,37 @@ class NLPService:
                 logger.info(f"Document {doc_id} indexed in ChromaDB.")
         except Exception as e:
             logger.error(f"Indexing error: {e}")
+
+    def index_repository(self, root_path: str):
+        """Walks the repository and indexes supported text files."""
+        if not self.initialized:
+            self.initialize()
+
+        logger.info(f"Starting repository index from {root_path}...")
+        count = 0
+        supported_exts = {'.py', '.md', '.js', '.html', '.css', '.json', '.txt', '.yaml', '.yml'}
+
+        for root, _, files in os.walk(root_path):
+            if any(x in root for x in ['.git', '__pycache__', 'node_modules', 'venv', 'env']):
+                continue
+
+            for file in files:
+                ext = os.path.splitext(file)[1]
+                if ext in supported_exts:
+                    path = os.path.join(root, file)
+                    try:
+                        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+                            # Chunking could be added here, currently full file
+                            self.add_document_to_knowledge_base(
+                                doc_id=path,
+                                text=content,
+                                metadata={"source": path, "filename": file}
+                            )
+                            count += 1
+                    except Exception as e:
+                        logger.warning(f"Failed to index {path}: {e}")
+
+        logger.info(f"Repository indexing complete. {count} files processed.")
 
 nlp_service = NLPService()
