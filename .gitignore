@@ -7,3 +7,20 @@ build/
 .env
 .pytest_cache/
 heady-manifest.json
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env
+
+# Database / AI Storage
+admin/db/
+*.sqlite3
+chroma/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
