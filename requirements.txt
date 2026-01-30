@@ -19,3 +19,4 @@ chromadb>=0.4.0
 bitsandbytes>=0.41.0
 accelerate>=0.26.0
 mcp>=0.1.0
+gradio>=3.0.0
