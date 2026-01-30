@@ -107,8 +107,12 @@ class RemoteGPUConfig(BaseModel):
     memory_limit: str = "16GB"
     use_rdma: bool = False
 
+class AIModelConfig(BaseModel):
+    selected_model: str = "distilgpt2"
+
 class Settings(BaseModel):
     remote_gpu: RemoteGPUConfig = RemoteGPUConfig()
+    ai_model: AIModelConfig = AIModelConfig()
 
 # API Endpoints
 def validate_path(path: str):
