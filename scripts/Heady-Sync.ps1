@@ -1,6 +1,6 @@
 # HEADY_BRAND:BEGIN
 # HEADY SYSTEMS :: SACRED GEOMETRY
-# FILE: scripts/Heady-Sync.ps1
+# FILE: scripts/hs.ps1
 # LAYER: root
 # 
 #         _   _  _____    _  __   __
@@ -12,12 +12,20 @@
 #    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 # HEADY_BRAND:END
 
+# HEADY CONTROL (hs) - Master Orchestration Command
+# "Pauses, catches all worktrees, eliminates conflict, fixes errors, and makes improvements."
+
 param(
-    [string]$Branch = "main",
-    [switch]$Force
+    [Alias("a")]
+    [string]$Action,
+    [switch]$Restart,
+    [switch]$Force,
+    [switch]$Checkpoint
 )
 
 $ErrorActionPreference = "Stop"
+$ScriptDir = $PSScriptRoot
+$RootDir = "$ScriptDir\.."
 
 function Show-Header {
     param($Message)
@@ -27,108 +35,151 @@ function Show-Header {
 }
 
 function Show-Step {
-    param($Message, $Status = "INFO")
-    $color = switch ($Status) {
-        "SUCCESS" { "Green" }
-        "WARNING" { "Yellow" }
-        "ERROR" { "Red" }
-        default { "Gray" }
-    }
-    Write-Host "[HS] $Message" -ForegroundColor $color
+    param($Message)
+    Write-Host "`n[HC] $Message" -ForegroundColor Yellow
 }
 
-Show-Header "HEADYSYNC: UNIFIED SYNCHRONIZATION PROTOCOL"
+Set-Location $RootDir
 
-# 1. Verify Base Layer Components
-Show-Step "Verifying base layer components (HeadyBuddy + HeadyLens)..."
-
-# Check if orchestrator is running
-try {
-    $response = Invoke-WebRequest -Uri "http://localhost:3300/status" -TimeoutSec 2 -UseBasicParsing -ErrorAction SilentlyContinue
-    Show-Step "Orchestrator online" "SUCCESS"
-} catch {
-    Show-Step "Orchestrator not responding - attempting to start..." "WARNING"
-    Start-Process -FilePath "node" -ArgumentList "heady-manager.js" -WorkingDirectory "$PSScriptRoot\.." -NoNewWindow
-    Start-Sleep -Seconds 3
-}
-
-# 2. Repository Status Check
-Show-Step "Checking repository status..."
-$gitStatus = git status --porcelain
-if ($gitStatus) {
-    Show-Step "Working directory has changes:" "WARNING"
-    git status --short
+# 0. CHECKPOINT HANDLER
+if ($Checkpoint -or $Action -eq "checkpoint") {
+    Show-Header "HEADY CHECKPOINT: GENERATING SYSTEM STATUS REPORT"
+    Show-Step "Scanning all system components..."
     
-    if (-not $Force) {
-        $response = Read-Host "Commit changes before sync? (y/n)"
-        if ($response -eq 'y') {
-            $commitMsg = Read-Host "Enter commit message"
-            git add .
-            git commit -m $commitMsg
-            Show-Step "Changes committed" "SUCCESS"
+    $CheckpointScript = "$ScriptDir\Invoke-Checkpoint.ps1"
+    if (Test-Path $CheckpointScript) {
+        & $CheckpointScript -Action generate
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "`n✅ Checkpoint generated successfully!" -ForegroundColor Green
+            Write-Host "📄 View with: hs -Action 'Invoke-Checkpoint.ps1 -Action view'" -ForegroundColor Cyan
+        } else {
+            Write-Error "Checkpoint generation failed."
+            exit 1
         }
     } else {
-        Show-Step "Force mode: committing all changes..." "WARNING"
-        git add .
-        git commit -m "HeadySync: Automated commit - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+        Write-Error "Checkpoint script not found at: $CheckpointScript"
+        exit 1
     }
+    exit 0
 }
 
-# 3. Fetch All Remotes
-Show-Step "Fetching updates from all remotes..."
+# 1. CUSTOM ACTION HANDLER
+if ($Action) {
+    Show-Header "HEADY CONTROL: EXECUTING ACTION '$Action'"
+    
+    # Resolve target path
+    $Target = "$ScriptDir\$Action"
+    if (-not (Test-Path $Target)) {
+        # Try checking if it's just a file in current dir or absolute path
+        if (Test-Path $Action) {
+            $Target = $Action
+        }
+    }
+    
+    if (Test-Path $Target) {
+        Show-Step "Running script: $Target"
+        if ($Target -match "\.js$") {
+            node $Target
+        } elseif ($Target -match "\.ps1$") {
+            & $Target
+        } else {
+            # Fallback for other files
+            Invoke-Item $Target
+        }
+    } else {
+        # Try as a raw command or alias if file not found
+        Show-Step "Executing command: $Action"
+        try {
+            Invoke-Expression $Action
+        } catch {
+            Write-Error "Action failed: $_"
+            exit 1
+        }
+    }
+    
+    exit $LASTEXITCODE
+}
+
+# 1. PAUSE (Stop Services)
+Show-Header "HEADY CONTROL: INITIATING MAINTENANCE CYCLE"
+Show-Step "Pausing System (Stopping Services)..."
+if (Test-Path "$ScriptDir\stop-heady-system.ps1") {
+    & "$ScriptDir\stop-heady-system.ps1"
+} else {
+    Write-Warning "stop-heady-system.ps1 not found."
+}
+
+# 2. INTELLIGENT CATCH (Fetch & Update Knowledge)
+Show-Step "Catching up (Fetching all remotes & Pruning worktrees)..."
 git fetch --all --prune
-if ($LASTEXITCODE -eq 0) {
-    Show-Step "Remote fetch completed" "SUCCESS"
-} else {
-    Show-Step "Remote fetch had issues" "WARNING"
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Failed to fetch remotes (Exit Code: $LASTEXITCODE). Proceeding locally."
+    $LASTEXITCODE = 0 # Reset
+}
+# Prune stale worktree entries (safe cleanup)
+git worktree prune
+
+
+# 3. FIX ERRORS (Linting & Auto-correction)
+Show-Step "Fixing Errors & standardizing code..."
+if (Test-Path "package.json") {
+    Write-Host "Running ESLint Auto-Fix..." -ForegroundColor Gray
+    # Run in cmd /c to ensure npm is found and execution doesn't abort script on lint errors
+    cmd /c "npm run lint -- --fix"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Linting found issues that could not be auto-fixed, or exited with error."
+        $LASTEXITCODE = 0 # Reset to allow script to continue
+    }
 }
 
-# 4. Push to All Remotes
-Show-Step "Synchronizing to all configured remotes..."
-$remotes = @("heady-me", "heady-sys", "origin")
+# 4. MAKE IMPROVEMENTS (Optimization)
+Show-Step "Making Improvements (Optimization)..."
+if (Test-Path "$ScriptDir\optimize_repos.ps1") {
+    & "$ScriptDir\optimize_repos.ps1"
+}
 
-foreach ($remote in $remotes) {
-    Show-Step "Pushing to $remote..."
-    
+# 4.5. CHECKPOINT VALIDATION
+Show-Step "Running Checkpoint Validation..."
+if (Test-Path "$ScriptDir\checkpoint-validation.ps1") {
+    $checkpointResult = & "$ScriptDir\checkpoint-validation.ps1" -QuickCheck
+    if ($LASTEXITCODE -ne 0 -and !$Force) {
+        Write-Error "Checkpoint validation failed. Use -Force to override or fix issues first."
+        exit 1
+    } elseif ($LASTEXITCODE -ne 0 -and $Force) {
+        Write-Warning "Checkpoint validation failed but continuing due to -Force flag."
+    } else {
+        Write-Host "✅ Checkpoint validation passed!" -ForegroundColor Green
+    }
+} else {
+    Write-Warning "Checkpoint validation script not found. Skipping..."
+}
+
+# 5. FINAL SYNC (Squash & Push)
+Show-Step "Finalizing Synchronization..."
+if (Test-Path "$ScriptDir\Heady-Sync.ps1") {
+    $currentBranch = git rev-parse --abbrev-ref HEAD
+    if ($LASTEXITCODE -eq 0 -and !([string]::IsNullOrWhiteSpace($currentBranch))) {
+        Write-Host "Detected active branch: $currentBranch" -ForegroundColor DarkGray
+    } else {
+        $currentBranch = "main"
+        Write-Warning "Could not detect branch, defaulting to 'main'."
+    }
+
+    # Call Heady-Sync with proper parameters
     if ($Force) {
-        git push $remote $Branch --force-with-lease
+        & "$ScriptDir\Heady-Sync.ps1" -Branch $currentBranch -Force
     } else {
-        git push $remote $Branch
-    }
-    
-    if ($LASTEXITCODE -eq 0) {
-        Show-Step "✓ $remote synchronized" "SUCCESS"
-    } else {
-        Show-Step "✗ $remote sync failed (exit code: $LASTEXITCODE)" "ERROR"
+        & "$ScriptDir\Heady-Sync.ps1" -Branch $currentBranch
     }
 }
 
-# 5. Verify Sync Status
-Show-Step "Verifying synchronization status..."
-git remote update 2>&1 | Out-Null
-$syncStatus = git status -uno
-
-if ($syncStatus -match "up to date" -or $syncStatus -match "up-to-date") {
-    Show-Step "All remotes synchronized successfully" "SUCCESS"
+# 6. RESTART (Optional)
+if ($Restart) {
+    Show-Step "Restarting System..."
+    if (Test-Path "$ScriptDir\start-heady-system.ps1") {
+        & "$ScriptDir\start-heady-system.ps1"
+    }
 } else {
-    Show-Step "Some remotes may be out of sync" "WARNING"
-    git status -uno
+    Show-Header "CYCLE COMPLETE. SYSTEM PAUSED."
+    Write-Host "Run 'hs -Restart' next time to auto-resume, or run '.\scripts\start-heady-system.ps1' to start." -ForegroundColor Gray
 }
-
-# 6. Post-Sync Health Check
-Show-Step "Running post-sync health checks..."
-try {
-    $healthCheck = Invoke-WebRequest -Uri "http://localhost:3300/status" -UseBasicParsing -ErrorAction SilentlyContinue
-    if ($healthCheck.StatusCode -eq 200) {
-        Show-Step "System health check passed" "SUCCESS"
-    } else {
-        Show-Step "System health check returned status: $($healthCheck.StatusCode)" "WARNING"
-    }
-} catch {
-    Show-Step "System health check failed - verify services manually" "WARNING"
-}
-
-Show-Header "HEADYSYNC COMPLETE"
-Write-Host "All configured remotes have been synchronized to branch: $Branch" -ForegroundColor Green
-Write-Host "Base layer components: HeadyBuddy + HeadyLens" -ForegroundColor Gray
-Write-Host "Orchestrator status: http://localhost:3300/status" -ForegroundColor Gray
