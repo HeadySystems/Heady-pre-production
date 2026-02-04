@@ -20,10 +20,12 @@ import CodeEditor from './components/CodeEditor';
 import CascadePanel from './components/CascadePanel';
 import TerminalComponent from './components/Terminal';
 import SettingsModal from './components/SettingsModal';
+import BlogModal from './components/BlogModal';
 
 function App() {
   const [currentFile, setCurrentFile] = useState(null); // { path, content }
   const [showSettings, setShowSettings] = useState(false);
+  const [showBlog, setShowBlog] = useState(false);
   const [language, setLanguage] = useState('plaintext');
 
   const token = localStorage.getItem('admin_token') || 'default_insecure_token';
@@ -88,7 +90,13 @@ function App() {
       />
 
       {/* Settings Button in Header (using portal or absolute) */}
-      <div style={{ position: 'absolute', top: '5px', right: '10px', zIndex: 100 }}>
+      <div style={{ position: 'absolute', top: '5px', right: '10px', zIndex: 100, display: 'flex', gap: '10px' }}>
+         <button
+            onClick={() => setShowBlog(true)}
+            style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '14px' }}
+         >
+            📖 Blog
+         </button>
          <button
             onClick={() => setShowSettings(true)}
             style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '14px' }}
@@ -98,6 +106,7 @@ function App() {
       </div>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showBlog && <BlogModal onClose={() => setShowBlog(false)} />}
     </div>
   );
 }
