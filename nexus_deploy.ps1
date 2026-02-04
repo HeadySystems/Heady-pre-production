@@ -8,10 +8,10 @@ Write-Host "∞ INITIATING WINDSURF NEXUS EVENT ∞" -ForegroundColor Cyan
 
 # 1. PRE-PUSH OPTIMIZATION
 Write-Host "`n[1/4] Optimizing Monorepo Structure..." -ForegroundColor Yellow
-if (Test-Path "backend/index.js") {
-    Write-Host "✓ Optimized structure detected." -ForegroundColor Green
+if (Test-Path "heady-manager.js") {
+    Write-Host "✓ Optimized structure detected (heady-manager.js)." -ForegroundColor Green
 } else {
-    Write-Host "! Structure optimization required. Run local build first." -ForegroundColor Red
+    Write-Host "! Structure optimization required. Run 'hc -a hb' first." -ForegroundColor Red
     exit 1
 }
 
