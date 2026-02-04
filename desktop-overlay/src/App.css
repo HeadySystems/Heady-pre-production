@@ -1,0 +1,21 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.companion-ui {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: rgba(30, 30, 30, 0.9);
+  border-radius: 15px;
+  padding: 15px;
+  color: white;
+  pointer-events: auto;
+}
