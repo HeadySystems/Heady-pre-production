@@ -3,11 +3,11 @@
 # FILE: scripts/hc.ps1
 # LAYER: root
 # 
-#         _   _  _____    _  __   __
-#        | | | || ____|  / \ \  / /
-#        | |_| ||  _|   / _ \ \ V / 
-#        |  _  || |___ / ___ \ | |  
-#        |_| |_||_____/_/   \_\|_|  
+#         _   _  _____    _    ____   __   __
+#        | | | || ____|  / \  |  _ \ \ \ / /
+#        | |_| ||  _|   / _ \ | | | | \ V / 
+#        |  _  || |___ / ___ \| |_| |  | |  
+#        |_| |_||_____/_/   \_\____/   |_|  
 # 
 #    Sacred Geometry :: Organic Systems :: Breathing Interfaces
 # HEADY_BRAND:END
@@ -40,6 +40,18 @@ Set-Location $RootDir
 # 0. CUSTOM ACTION HANDLER
 if ($Action) {
     Show-Header "HEADY CONTROL: EXECUTING ACTION '$Action'"
+    
+    # Special handling for hc_autobuild
+    if ($Action -eq "hc_autobuild" -or $Action -eq "autobuild") {
+        Show-Step "Running HeadyAutoBuild..."
+        if (Test-Path "$ScriptDir\..\src\hc_autobuild.js") {
+            node "$ScriptDir\..\src\hc_autobuild.js"
+            exit $LASTEXITCODE
+        } else {
+            Write-Error "hc_autobuild.js not found"
+            exit 1
+        }
+    }
     
     # Resolve target path
     $Target = "$ScriptDir\$Action"
