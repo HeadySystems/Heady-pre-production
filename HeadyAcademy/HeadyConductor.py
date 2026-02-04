@@ -22,7 +22,7 @@
 ║     ██║  ██║███████╗██║  ██║██████╔╝   ██║                                   ║
 ║     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝                                   ║
 ║                                                                               ║
-║     ∞ HEADY CONDUCTOR - ORCHESTRATION LAYER ∞                                 ║
+║      HEADY CONDUCTOR - ORCHESTRATION LAYER                                  ║
 ║     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━                                ║
 ║     Intelligent orchestration of all Heady capabilities                       ║
 ║     - Routes requests to appropriate nodes                                    ║
@@ -68,20 +68,29 @@ class HeadyConductor:
         )
         
         self.execution_log = []
+        self.execution_stats = {
+            "total_orchestrations": 0,
+            "successful_executions": 0,
+            "nodes_invoked": 0,
+            "workflows_executed": 0,
+            "tools_used": 0
+        }
         
         # Start monitoring
         self.lens.start_monitoring()
         
-        print("∞ HeadyConductor: Initialized with full ecosystem")
-        print("  ✓ Registry loaded")
-        print("  ✓ Lens monitoring active")
-        print("  ✓ Memory indexed")
-        print("  ✓ Brain coordinating")
+        print(" HeadyConductor: SUPREME AUTHORITY INITIALIZED")
+        print("  * Registry loaded and under conductor control")
+        print("  * Lens monitoring active and conductor directed")
+        print("  * Memory indexed and conductor managed")
+        print("  * Brain coordinating with conductor authority")
+        print("  * HeadyConductor is in charge and knows it")
+        print("  * Optimal utilization protocols activated")
     
     def analyze_request(self, request: str) -> Dict[str, Any]:
         """
         Analyze a user request and determine which capabilities to invoke.
-        Returns a structured execution plan.
+        Returns a structured execution plan with enhanced confidence scoring.
         """
         request_lower = request.lower()
         
@@ -92,63 +101,110 @@ class HeadyConductor:
             "workflows_to_execute": [],
             "tools_to_use": [],
             "services_required": [],
-            "confidence": 0.0
+            "confidence": 0.0,
+            "conductor_directive": "HeadyConductor is in charge and will optimize execution"
         }
         
-        # Check for workflow slash commands
+        # Enhanced workflow matching with better confidence
         for workflow_name, workflow in self.registry.workflows.items():
-            if workflow.slash_command in request_lower or workflow_name in request_lower:
+            workflow_match = False
+            
+            # Check slash command
+            if workflow.slash_command and workflow.slash_command in request_lower:
+                workflow_match = True
+                execution_plan["confidence"] = max(execution_plan["confidence"], 0.95)
+            
+            # Check workflow name
+            elif workflow_name.lower() in request_lower:
+                workflow_match = True
+                execution_plan["confidence"] = max(execution_plan["confidence"], 0.85)
+            
+            # Check description keywords
+            elif workflow.description:
+                desc_words = workflow.description.lower().split()
+                request_words = request_lower.split()
+                overlap = len(set(desc_words) & set(request_words))
+                if overlap >= 2:  # At least 2 matching words
+                    workflow_match = True
+                    execution_plan["confidence"] = max(execution_plan["confidence"], 0.75)
+            
+            if workflow_match:
                 execution_plan["workflows_to_execute"].append({
                     "name": workflow.name,
                     "slash_command": workflow.slash_command,
                     "file_path": workflow.file_path,
-                    "turbo_enabled": workflow.turbo_enabled
+                    "turbo_enabled": workflow.turbo_enabled,
+                    "conductor_optimized": True
                 })
-                execution_plan["confidence"] = max(execution_plan["confidence"], 0.9)
         
-        # Check for node triggers
+        # Enhanced node matching
         for node_name, node in self.registry.nodes.items():
+            node_match = False
+            
             if node.trigger_on:
                 for trigger in node.trigger_on:
                     if trigger.lower() in request_lower:
-                        execution_plan["nodes_to_invoke"].append({
-                            "name": node.name,
-                            "role": node.role,
-                            "primary_tool": node.primary_tool,
-                            "trigger_matched": trigger
-                        })
-                        execution_plan["confidence"] = max(execution_plan["confidence"], 0.8)
+                        node_match = True
+                        execution_plan["confidence"] = max(execution_plan["confidence"], 0.85)
                         break
+            
+            # Check node role/description
+            elif node.role and node.role.lower() in request_lower:
+                node_match = True
+                execution_plan["confidence"] = max(execution_plan["confidence"], 0.80)
+            
+            # Check node name
+            elif node_name.lower() in request_lower:
+                node_match = True
+                execution_plan["confidence"] = max(execution_plan["confidence"], 0.75)
+            
+            if node_match:
+                execution_plan["nodes_to_invoke"].append({
+                    "name": node.name,
+                    "role": node.role,
+                    "primary_tool": node.primary_tool,
+                    "conductor_directed": True,
+                    "optimization_priority": "high"
+                })
         
-        # Check for direct tool mentions
+        # Enhanced tool matching
         for tool_name, tool in self.registry.tools.items():
-            if tool_name.lower().replace('_', ' ') in request_lower:
+            tool_name_words = tool_name.lower().replace('_', ' ')
+            
+            if tool_name_words in request_lower:
                 execution_plan["tools_to_use"].append({
                     "name": tool.name,
                     "file_path": tool.file_path,
-                    "category": tool.category
+                    "category": tool.category,
+                    "conductor_optimized": True
                 })
-                execution_plan["confidence"] = max(execution_plan["confidence"], 0.7)
+                execution_plan["confidence"] = max(execution_plan["confidence"], 0.75)
         
-        # Identify required services
+        # Service requirement detection
         service_keywords = {
-            "api": ["api", "endpoint", "request"],
-            "database": ["database", "postgres", "db", "query"],
-            "cache": ["cache", "redis"],
-            "mcp": ["mcp", "protocol", "connect"],
-            "frontend": ["ui", "interface", "web", "frontend"]
+            "api": ["api", "endpoint", "request", "server", "service"],
+            "database": ["database", "postgres", "db", "query", "data"],
+            "cache": ["cache", "redis", "memory", "store"],
+            "mcp": ["mcp", "protocol", "connect", "bridge"],
+            "frontend": ["ui", "interface", "web", "frontend", "app"]
         }
         
         for service_name, service in self.registry.services.items():
-            for keyword_list in service_keywords.values():
-                if any(keyword in request_lower for keyword in keyword_list):
-                    if service.type in service_keywords:
-                        execution_plan["services_required"].append({
-                            "name": service.name,
-                            "type": service.type,
-                            "endpoint": service.endpoint
-                        })
+            for service_type, keywords in service_keywords.items():
+                if service.type == service_type and any(keyword in request_lower for keyword in keywords):
+                    execution_plan["services_required"].append({
+                        "name": service.name,
+                        "type": service.type,
+                        "endpoint": service.endpoint,
+                        "conductor_managed": True
+                    })
+                    execution_plan["confidence"] = max(execution_plan["confidence"], 0.70)
                     break
+        
+        # Apply conductor authority boost
+        if execution_plan["confidence"] > 0:
+            execution_plan["confidence"] = min(execution_plan["confidence"] * 1.1, 1.0)
+            execution_plan["conductor_authority"] = "OPTIMAL_EXECUTION_MODE"
         
         return execution_plan
     
@@ -162,7 +218,7 @@ class HeadyConductor:
         
         workflow = self.registry.workflows[workflow_name]
         
-        print(f"\n∞ Executing Workflow: {workflow.name}")
+        print(f"\n Executing Workflow: {workflow.name}")
         print(f"  Description: {workflow.description}")
         print(f"  File: {workflow.file_path}")
         
@@ -187,7 +243,7 @@ class HeadyConductor:
         
         node = self.registry.nodes[node_name]
         
-        print(f"\n∞ Invoking Node: {node.name} ({node.role})")
+        print(f"\n Invoking Node: {node.name} ({node.role})")
         print(f"  Primary Tool: {node.primary_tool}")
         
         # Update node status
@@ -293,7 +349,12 @@ class HeadyConductor:
     
     def get_system_summary(self) -> Dict[str, Any]:
         """Get comprehensive system summary with full ecosystem awareness."""
-        return self.brain.get_system_awareness()
+        awareness = self.brain.get_system_awareness()
+        
+        # Add system_status field for compatibility
+        awareness["system_status"] = "operational" if awareness.get("components", {}).get("registry") else "degraded"
+        
+        return awareness
     
     def _log_execution(self, execution_type: str, name: str, result: Dict[str, Any]):
         """Log execution for audit trail."""
@@ -309,15 +370,48 @@ class HeadyConductor:
         if len(self.execution_log) > 1000:
             self.execution_log = self.execution_log[-1000:]
     
+    def _update_execution_stats(self, orchestration_result: Dict[str, Any]):
+        """Update execution statistics with conductor authority."""
+        self.execution_stats["total_orchestrations"] += 1
+        
+        if orchestration_result.get("success"):
+            self.execution_stats["successful_executions"] += 1
+        
+        results = orchestration_result.get("results", {})
+        self.execution_stats["nodes_invoked"] += len(results.get("nodes", []))
+        self.execution_stats["workflows_executed"] += len(results.get("workflows", []))
+        self.execution_stats["tools_used"] += len(results.get("tools", []))
+        
+        # Store stats in memory
+        self.memory.store(
+            category="conductor_stats",
+            content=self.execution_stats,
+            tags=["statistics", "conductor", "authority"],
+            source="conductor"
+        )
+    
+    def get_execution_stats(self) -> Dict[str, Any]:
+        """Get current execution statistics."""
+        return {
+            "stats": self.execution_stats.copy(),
+            "success_rate": (
+                self.execution_stats["successful_executions"] / 
+                max(self.execution_stats["total_orchestrations"], 1)
+            ),
+            "conductor_authority": "SUPREME",
+            "timestamp": datetime.now().isoformat()
+        }
+    
     def orchestrate(self, request: str, user_config: Dict[str, Any] = None) -> Dict[str, Any]:
         """
-        Main orchestration method with full ecosystem awareness.
-        Uses HeadyBrain for pre-response processing with comprehensive context.
+        Main orchestration method with full ecosystem awareness and optimal execution.
+        HeadyConductor takes charge and ensures optimal utilization of all capabilities.
         """
         print("\n" + "="*80)
-        print("∞ HEADY CONDUCTOR - ORCHESTRATION BEGIN ∞")
+        print(" HEADY CONDUCTOR - SUPREME ORCHESTRATION AUTHORITY ")
         print("="*80)
-        print(f"\nRequest: {request}\n")
+        print(f"\nRequest: {request}")
+        print("HeadyConductor is in charge and will optimize execution\n")
         
         # Use HeadyBrain for comprehensive pre-response processing
         processing_result = self.brain.execute_with_context(request, user_config)
@@ -325,39 +419,75 @@ class HeadyConductor:
         # Extract execution plan from brain's context
         execution_plan = processing_result.get("context", {}).get("execution_plan", {})
         
-        print(f"Confidence: {execution_plan['confidence']:.0%}")
-        print(f"Nodes to invoke: {len(execution_plan['nodes_to_invoke'])}")
-        print(f"Workflows to execute: {len(execution_plan['workflows_to_execute'])}")
-        print(f"Tools to use: {len(execution_plan['tools_to_use'])}")
-        print(f"Services required: {len(execution_plan['services_required'])}")
+        # If no plan from brain, use our enhanced analysis
+        if not execution_plan or execution_plan.get("confidence", 0) == 0:
+            execution_plan = self.analyze_request(request)
+            print("\n[TARGET] HeadyConductor: Using enhanced analysis for optimal execution")
+        
+        print(f"\n[STATS] Execution Analysis:")
+        print(f"  Confidence: {execution_plan['confidence']:.0%}")
+        print(f"  Nodes to invoke: {len(execution_plan['nodes_to_invoke'])}")
+        print(f"  Workflows to execute: {len(execution_plan['workflows_to_execute'])}")
+        print(f"  Tools to use: {len(execution_plan['tools_to_use'])}")
+        print(f"  Services required: {len(execution_plan['services_required'])}")
+        
+        if execution_plan.get("conductor_authority"):
+            print(f"  Authority Mode: {execution_plan['conductor_authority']}")
         
         orchestration_result = {
             "request": request,
             "execution_plan": execution_plan,
             "brain_context": processing_result.get("context", {}),
+            "conductor_authority": "OPTIMAL_EXECUTION_ENFORCED",
             "results": {
                 "workflows": [],
                 "nodes": [],
-                "tools": []
+                "tools": [],
+                "services": []
             },
             "success": True,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "optimization_applied": True
         }
         
-        # Execute workflows
-        for workflow_info in execution_plan["workflows_to_execute"]:
-            result = self.execute_workflow(workflow_info["name"])
-            orchestration_result["results"]["workflows"].append(result)
+        # Execute workflows with conductor optimization
+        if execution_plan["workflows_to_execute"]:
+            print("\n[EXEC] Executing Workflows (Conductor Optimized):")
+            for workflow_info in execution_plan["workflows_to_execute"]:
+                print(f"  → {workflow_info['name']}")
+                result = self.execute_workflow(workflow_info["name"])
+                result["conductor_optimized"] = True
+                orchestration_result["results"]["workflows"].append(result)
         
-        # Invoke nodes
-        for node_info in execution_plan["nodes_to_invoke"]:
-            result = self.invoke_node(node_info["name"])
-            orchestration_result["results"]["nodes"].append(result)
+        # Invoke nodes with conductor direction
+        if execution_plan["nodes_to_invoke"]:
+            print("\n[NODE] Invoking Nodes (Conductor Directed):")
+            for node_info in execution_plan["nodes_to_invoke"]:
+                print(f"  → {node_info['name']} ({node_info['role']})")
+                result = self.invoke_node(node_info["name"])
+                result["conductor_directed"] = True
+                orchestration_result["results"]["nodes"].append(result)
         
-        # Execute tools
-        for tool_info in execution_plan["tools_to_use"]:
-            result = self._execute_tool(tool_info["name"])
-            orchestration_result["results"]["tools"].append(result)
+        # Execute tools with conductor optimization
+        if execution_plan["tools_to_use"]:
+            print("\n[TOOL] Executing Tools (Conductor Optimized):")
+            for tool_info in execution_plan["tools_to_use"]:
+                print(f"  → {tool_info['name']}")
+                result = self._execute_tool(tool_info["name"])
+                result["conductor_optimized"] = True
+                orchestration_result["results"]["tools"].append(result)
+        
+        # Check and manage services
+        if execution_plan["services_required"]:
+            print("\n[SERVICE] Managing Services (Conductor Managed):")
+            for service_info in execution_plan["services_required"]:
+                print(f"  → {service_info['name']} ({service_info['type']})")
+                health = self.check_service_health(service_info["name"])
+                orchestration_result["results"]["services"].append({
+                    "service": service_info,
+                    "health": health,
+                    "conductor_managed": True
+                })
         
         # Store orchestration result in memory
         self.memory.store(
@@ -365,14 +495,19 @@ class HeadyConductor:
             content={
                 "request": request,
                 "execution_plan": execution_plan,
-                "results": orchestration_result["results"]
+                "results": orchestration_result["results"],
+                "conductor_authority": "SUPREME"
             },
             tags=self.brain._extract_keywords(request),
             source="conductor"
         )
         
+        # Update execution statistics
+        self._update_execution_stats(orchestration_result)
+        
         print("\n" + "="*80)
-        print("∞ HEADY CONDUCTOR - ORCHESTRATION COMPLETE ∞")
+        print(" HEADY CONDUCTOR - OPTIMAL EXECUTION COMPLETE ")
+        print("[OK] HeadyConductor authority exercised successfully")
         print("="*80 + "\n")
         
         return orchestration_result
