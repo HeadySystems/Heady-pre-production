@@ -1,0 +1,18 @@
+<<<<<<< HEAD
+__pycache__/
+*.pyc
+venv/
+node_modules/
+dist/
+build/
+.env
+.pytest_cache/
+heady-manifest.json
+=======
+node_modules/
+.env
+.heady_secrets
+__pycache__/
+*.log
+.venv/
+>>>>>>> 5f1e865 (feat: intelligent squash merge - HeadySystems architecture with Docker MCP integration)
