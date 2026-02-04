@@ -53,6 +53,20 @@ if ($Action) {
         }
     }
     
+    # Special handling for deploy
+    if ($Action -eq "deploy") {
+        Show-Step "Running Automated Deploy..."
+        if (Test-Path "$ScriptDir\deploy.ps1") {
+            $deployArgs = @()
+            if ($args) { $deployArgs = $args }
+            & "$ScriptDir\deploy.ps1" @deployArgs
+            exit $LASTEXITCODE
+        } else {
+            Write-Error "deploy.ps1 not found"
+            exit 1
+        }
+    }
+    
     # Resolve target path
     $Target = "$ScriptDir\$Action"
     if (-not (Test-Path $Target)) {
