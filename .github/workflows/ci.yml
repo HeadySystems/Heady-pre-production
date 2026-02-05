@@ -42,7 +42,7 @@ jobs:
           cache: pip
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install Python dependencies
         run: |
