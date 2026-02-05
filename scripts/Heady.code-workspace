@@ -149,6 +149,7 @@
 		}
 	],
 	"settings": {
-		"powershell.cwd": "Heady"
+		"powershell.cwd": "Heady",
+		"git.ignoreLimitWarning": true
 	}
 }
