@@ -31,8 +31,33 @@
       "assets/**/*"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "msix",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "publisherName": "Heady Systems",
+      "verifyUpdateCodeSignature": false
+    },
+    "msix": {
+      "identityName": "HeadySystems.HeadyBuddy",
+      "publisher": "CN=Heady Systems",
+      "publisherDisplayName": "Heady Systems",
+      "displayName": "HeadyBuddy",
+      "description": "AI Companion Task Assistant with Sacred Geometry Design",
+      "backgroundColor": "#1a1a2e",
+      "showNameOnTiles": true,
+      "languages": ["en-US"],
+      "capabilities": [
+        "internetClient",
+        "privateNetworkClientServer"
+      ]
     }
   }
 }
