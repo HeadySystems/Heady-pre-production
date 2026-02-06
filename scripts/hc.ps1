@@ -149,9 +149,12 @@ if (Test-Path "$ScriptDir\Heady-Sync.ps1") {
         Write-Warning "Could not detect branch, defaulting to 'main'."
     }
 
-    $syncArgs = @("-Branch", $currentBranch)
-    if ($Force) { $syncArgs += "-Force" }
-    & "$ScriptDir\Heady-Sync.ps1" @syncArgs
+    # Call Heady-Sync with proper parameters
+    if ($Force) {
+        & "$ScriptDir\Heady-Sync.ps1" -Force
+    } else {
+        & "$ScriptDir\Heady-Sync.ps1"
+    }
 }
 
 # 6. RESTART (Optional)
